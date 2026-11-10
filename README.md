@@ -1,6 +1,15 @@
 # TubePlay - iOS YouTube Background & Offscreen Audio Player
 
+[![Build Unsigned IPA](https://github.com/Davoxic/TubePlay/actions/workflows/build-ipa.yml/badge.svg)](https://github.com/Davoxic/TubePlay/actions/workflows/build-ipa.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Davoxic/TubePlay?color=red)](https://github.com/Davoxic/TubePlay/releases/latest)
+
 **TubePlay** is a native iOS application built with **Swift and SwiftUI** that lets you search YouTube videos and play them continuously with the screen turned off, exactly like mobile browsers (Brave, Safari desktop mode) or dedicated music apps.
+
+### 📥 Direct Downloads & Links
+- **GitHub Repository**: [https://github.com/Davoxic/TubePlay](https://github.com/Davoxic/TubePlay)
+- **GitHub Releases Page**: [https://github.com/Davoxic/TubePlay/releases/tag/v1.0.0](https://github.com/Davoxic/TubePlay/releases/tag/v1.0.0)
+- **Download Unsigned IPA**: [**TubePlay-unsigned.ipa**](https://github.com/Davoxic/TubePlay/releases/download/v1.0.0/TubePlay-unsigned.ipa)
+- **Local Workspace Copy**: `TubePlay-unsigned.ipa` (in project root)
 
 ---
 
