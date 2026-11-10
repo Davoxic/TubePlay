@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TubePlay - iOS Offscreen YouTube Player Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- iPhone Device Frame Wrapper -->
+    <div class="iphone-frame">
+        <div class="notch">
+            <div class="speaker"></div>
+            <div class="camera"></div>
+        </div>
+        <div class="status-bar">
+            <span class="time" id="status-time">9:41</span>
+            <div class="status-icons">
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-full"></i>
+            </div>
+        </div>
+
+        <!-- App Screen Container -->
+        <div class="app-container">
+            <!-- 1. Search Tab Content -->
+            <div id="tab-search" class="tab-pane active">
+                <div class="app-header">
+                    <h2>TubePlay</h2>
+                    <span class="badge"><i class="fa-solid fa-circle-play"></i> Background Ready</span>
+                </div>
+
+                <div class="search-box-container">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-input" placeholder="Search YouTube or paste URL..." autocomplete="off">
+                        <button id="clear-search-btn" class="clear-btn" style="display: none;"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+
+                <!-- Suggestions Dropdown -->
+                <div id="suggestions-box" class="suggestions-box" style="display: none;"></div>
+
+                <!-- Curated Category Pills -->
+                <div class="category-pills">
+                    <button class="pill active" data-query="lofi hip hop radio"><i class="fa-solid fa-music"></i> Lofi</button>
+                    <button class="pill" data-query="deep focus study music"><i class="fa-solid fa-brain"></i> Focus</button>
+                    <button class="pill" data-query="acoustic guitar relaxing"><i class="fa-solid fa-guitar"></i> Acoustic</button>
+                    <button class="pill" data-query="sleep ambient sounds delta waves"><i class="fa-solid fa-moon"></i> Sleep</button>
+                    <button class="pill" data-query="technology podcast interview"><i class="fa-solid fa-microphone"></i> Podcasts</button>
+                </div>
+
+                <!-- Search Results & Featured List -->
+                <div class="video-list-scroll">
+                    <div class="section-title" id="results-title">Featured Stations</div>
+                    <div id="video-list" class="video-list"></div>
+                </div>
+            </div>
+
+            <!-- 2. Browser Tab Content -->
+            <div id="tab-browser" class="tab-pane">
+                <div class="browser-bar">
+                    <button class="browser-btn" id="browser-back"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="browser-btn" id="browser-forward"><i class="fa-solid fa-chevron-right"></i></button>
+                    <div class="url-input-box">
+                        <i class="fa-solid fa-lock text-green"></i>
+                        <input type="text" id="browser-url" value="https://m.youtube.com">
+                        <button class="reload-btn" id="browser-reload"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                    <button class="browser-btn" id="desktop-mode-btn" title="Toggle Desktop User Agent"><i class="fa-solid fa-desktop"></i></button>
+                </div>
+                <div class="browser-info-banner">
+                    <i class="fa-solid fa-shield-halved text-green"></i>
+                    <span>Background Play Active • AdBlock Enabled • Screen-Off Safe</span>
+                </div>
+                <div class="browser-iframe-container">
+                    <iframe id="browser-frame" src="https://www.youtube.com/embed?listType=search&list=lofi+hip+hop" allow="autoplay; fullscreen" playsinline></iframe>
+                </div>
+            </div>
+
+            <!-- 3. Library Tab Content -->
+            <div id="tab-library" class="tab-pane">
+                <div class="app-header">
+                    <h2>Library</h2>
+                </div>
+                <div class="segmented-control">
+                    <button class="segment-btn active" id="btn-fav-tab">Favorites (<span id="fav-count">0</span>)</button>
+                    <button class="segment-btn" id="btn-hist-tab">History (<span id="hist-count">0</span>)</button>
+                </div>
+                <div id="library-list" class="video-list-scroll"></div>
+            </div>
+
+            <!-- 4. Settings Tab Content -->
+            <div id="tab-settings" class="tab-pane">
+                <div class="app-header">
+                    <h2>Settings</h2>
+                </div>
+                <div class="settings-scroll">
+                    <div class="settings-card">
+                        <div class="status-indicator">
+                            <span class="pulse-dot"></span>
+                            <div>
+                                <strong>AVAudioSession: Active</strong>
+                                <p>Configured with .playback & .moviePlayback</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-header">PLAYBACK & ADS</div>
+                        <div class="setting-row">
+                            <span>Block Video Ads</span>
+                            <input type="checkbox" checked class="ios-switch">
+                        </div>
+                        <div class="setting-row">
+                            <span>Auto-Skip Sponsor Segments</span>
+                            <input type="checkbox" checked class="ios-switch">
+                        </div>
+                        <div class="setting-row">
+                            <span>Keep Playing When Screen Locks</span>
+                            <input type="checkbox" checked class="ios-switch">
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-header">HOW BACKGROUND PLAYBACK WORKS</div>
+                        <div class="guide-step">
+                            <div class="step-num">1</div>
+                            <p>Pick any video or search in TubePlay.</p>
+                        </div>
+                        <div class="guide-step">
+                            <div class="step-num">2</div>
+                            <p>Press power button to turn off the iPhone screen.</p>
+                        </div>
+                        <div class="guide-step">
+                            <div class="step-num">3</div>
+                            <p>WebKit process keeps streaming audio; Lock Screen & AirPods controls remain fully functional.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Mini Player (Docked above Tab Bar) -->
+            <div id="mini-player" class="mini-player" style="display: none;">
+                <div class="mini-content" id="mini-player-clickable">
+                    <img id="mini-thumb" src="" alt="Thumbnail">
+                    <div class="mini-info">
+                        <span id="mini-title" class="truncate">Video Title</span>
+                        <span id="mini-channel" class="truncate">Channel Name</span>
+                    </div>
+                    <div class="mini-controls">
+                        <button id="mini-play-btn"><i class="fa-solid fa-play"></i></button>
+                        <button id="mini-forward-btn"><i class="fa-solid fa-rotate-right"></i> 15</button>
+                    </div>
+                </div>
+                <div class="mini-progress-bar">
+                    <div id="mini-progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- Bottom Tab Bar -->
+            <div class="tab-bar">
+                <button class="tab-item active" data-tab="tab-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Search</span>
+                </button>
+                <button class="tab-item" data-tab="tab-browser">
+                    <i class="fa-solid fa-globe"></i>
+                    <span>Browser</span>
+                </button>
+                <button class="tab-item" data-tab="tab-library">
+                    <i class="fa-solid fa-music"></i>
+                    <span>Library</span>
+                </button>
+                <button class="tab-item" data-tab="tab-settings">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Full Player Sheet Modal -->
+        <div id="full-player" class="full-player-sheet">
+            <div class="sheet-drag-handle"></div>
+            <div class="full-top-bar">
+                <button id="close-player-btn"><i class="fa-solid fa-chevron-down"></i></button>
+                <div class="now-playing-label">
+                    <span>NOW PLAYING</span>
+                    <strong id="full-channel-top">Channel</strong>
+                </div>
+                <button id="sleep-timer-btn"><i class="fa-solid fa-moon"></i></button>
+            </div>
+
+            <div class="full-video-box">
+                <div id="yt-player-container"></div>
+            </div>
+
+            <div class="full-details">
+                <div class="title-col">
+                    <h3 id="full-title">Video Title</h3>
+                    <p id="full-channel">Channel Name</p>
+                </div>
+                <button id="full-fav-btn" class="fav-btn"><i class="fa-regular fa-heart"></i></button>
+            </div>
+
+            <!-- Scrubber -->
+            <div class="scrubber-container">
+                <input type="range" id="seek-slider" min="0" max="100" value="0">
+                <div class="time-row">
+                    <span id="time-current">0:00</span>
+                    <span id="time-duration">0:00</span>
+                </div>
+            </div>
+
+            <!-- Full Player Controls -->
+            <div class="full-controls">
+                <button id="loop-btn" class="control-btn" title="Loop Mode"><i class="fa-solid fa-repeat"></i></button>
+                <button id="rewind-btn" class="control-btn"><i class="fa-solid fa-arrow-rotate-left"></i><span>15</span></button>
+                <button id="play-pause-btn" class="big-play-btn"><i class="fa-solid fa-play"></i></button>
+                <button id="forward-btn" class="control-btn"><i class="fa-solid fa-arrow-rotate-right"></i><span>15</span></button>
+                <button id="speed-btn" class="control-btn speed-badge">1.0x</button>
+            </div>
+
+            <!-- Screen-off badge -->
+            <div class="screen-off-badge">
+                <span class="dot-green"></span>
+                <span>Screen-Off Background Playback Ready</span>
+                <i class="fa-solid fa-shield-check text-green"></i>
+            </div>
+        </div>
+
+        <!-- Home Indicator bar -->
+        <div class="home-indicator"></div>
+    </div>
+
+    <!-- Background script injection & simulator logic -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="app.js"></script>
+</body>
+</html>

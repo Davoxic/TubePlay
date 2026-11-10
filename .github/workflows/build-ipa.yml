@@ -1,0 +1,89 @@
+name: Build Unsigned IPA
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Package IPA
+    runs-on: macos-14
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Show Available Xcodes
+        run: |
+          ls -d /Applications/Xcode* || true
+
+      - name: Select Xcode
+        run: |
+          if [ -d "/Applications/Xcode_15.4.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_15.4.app
+          elif [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app
+          else
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
+          xcodebuild -version
+
+      - name: Build Unsigned iOS App
+        run: |
+          xcodebuild -project TubePlay/TubePlay.xcodeproj \
+            -scheme TubePlay \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            clean build
+
+      - name: Package Unsigned IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/TubePlay.app Payload/
+          zip -r -y TubePlay-unsigned.ipa Payload
+          rm -rf Payload
+          echo "Built IPA Size: $(ls -lh TubePlay-unsigned.ipa | awk '{print $5}')"
+
+      - name: Upload IPA as GitHub Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TubePlay-unsigned-ipa
+          path: TubePlay-unsigned.ipa
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "TubePlay v1.0.0 (Unsigned IPA)"
+          body: |
+            ### 📱 TubePlay iOS App - Unsigned IPA Release
+            
+            Download `TubePlay-unsigned.ipa` below to sideload TubePlay onto your iPhone or iPad!
+
+            #### 📥 How to Sideload & Install:
+            - **AltStore**: Download `TubePlay-unsigned.ipa` directly in Safari on iOS, open **AltStore > My Apps > +**, and select the IPA.
+            - **Sideloadly**: Connect your iPhone to your PC or Mac via USB, drag `TubePlay-unsigned.ipa` into Sideloadly, enter your Apple ID, and click **Start**.
+            - **TrollStore** (iOS 14.0 - 16.6.1): Tap the downloaded IPA in Files and choose **Install with TrollStore** (permanent, no resigning).
+            - **LiveContainer**: Import without developer account or certificate.
+
+            #### ✨ Features:
+            - 🎧 **Continuous Screen-Off Playback**: Audio never pauses when you lock your screen or switch apps.
+            - 📱 **Lock Screen Widget**: Live playback progress bar, high-res artwork, channel, and title via `MPNowPlayingInfoCenter`.
+            - 🎛️ **Full Remote Commands**: Play/Pause, 15s forward, 15s rewind via AirPods, Apple Watch, or Lock Screen.
+            - 🔍 **YouTube Search**: Instant search suggestions and curated discover stations.
+            - 🌐 **Browser Mode**: Browse YouTube with desktop user-agent, background playback, and ad blocking.
+            - ⏰ **Sleep Timer**: Auto-pause timer (15m, 30m, 45m, 60m).
+          files: TubePlay-unsigned.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
