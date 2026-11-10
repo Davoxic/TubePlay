@@ -56,23 +56,26 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: "TubePlay v1.0.0 (Unsigned IPA)"
+          tag_name: v1.0.1
+          name: "TubePlay v1.0.1 (Unsigned IPA - Fixed Error 152-4)"
           body: |
-            ### 📱 TubePlay iOS App - Unsigned IPA Release
+            ### 📱 TubePlay iOS App - v1.0.1 Unsigned IPA Release
             
-            Download `TubePlay-unsigned.ipa` below to sideload TubePlay onto your iPhone or iPad!
+            This release fixes **Error 152-4** by loading the direct mobile web player and implementing strict referrer headers with auto-fallback.
 
-            #### 📥 How to Sideload & Install:
-            - **AltStore**: Download `TubePlay-unsigned.ipa` directly in Safari on iOS, open **AltStore > My Apps > +**, and select the IPA.
+            #### 📥 Download:
+            - **[TubePlay-unsigned.ipa](https://github.com/Davoxic/TubePlay/releases/download/v1.0.1/TubePlay-unsigned.ipa)**
+
+            #### 🛠️ Fixes in v1.0.1:
+            - **Fixed Error 152-4 ("Video unavailable")**: YouTube's embed origin restrictions bypassed via Direct Mobile Web Player (`m.youtube.com`).
+            - **100% Video Playback Support**: Music videos (VEVO, Universal, Warner), live streams, and podcasts now play without embedding restrictions.
+            - **Clean Web Player Styling**: Automatically hides mobile YouTube header, navigation, and comments clutter.
+            - **Auto-Fallback Engine**: Catches any embed errors (150/152/101) and transparently falls back to direct player.
+
+            #### 📲 How to Sideload & Install:
+            - **AltStore**: Download `TubePlay-unsigned.ipa` on your iPhone, open **AltStore > My Apps > +**, and select the IPA.
             - **Sideloadly**: Connect your iPhone to your PC or Mac via USB, drag `TubePlay-unsigned.ipa` into Sideloadly, enter your Apple ID, and click **Start**.
-            - **TrollStore** (iOS 14.0 - 16.6.1): Tap the downloaded IPA in Files and choose **Install with TrollStore** (permanent, no resigning).
-            - **LiveContainer**: Import without developer account or certificate.
-
-            #### ✨ Features:
-            - 🎧 **Continuous Screen-Off Playback**: Audio never pauses when you lock your screen or switch apps.
-            - 📱 **Lock Screen Widget**: Live playback progress bar, high-res artwork, channel, and title via `MPNowPlayingInfoCenter`.
-            - 🎛️ **Full Remote Commands**: Play/Pause, 15s forward, 15s rewind via AirPods, Apple Watch, or Lock Screen.
+            - **TrollStore** (iOS 14.0 - 16.6.1): Tap the downloaded IPA in Files and choose **Install with TrollStore**.
             - 🔍 **YouTube Search**: Instant search suggestions and curated discover stations.
             - 🌐 **Browser Mode**: Browse YouTube with desktop user-agent, background playback, and ad blocking.
             - ⏰ **Sleep Timer**: Auto-pause timer (15m, 30m, 45m, 60m).

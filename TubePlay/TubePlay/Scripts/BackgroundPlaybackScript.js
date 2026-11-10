@@ -69,8 +69,30 @@
             display: none !important;
         }
 
+        /* Clean Player Mode on m.youtube.com: hide mobile header, comments, and related clutter */
+        ytm-mobile-topbar-renderer,
+        .header-bar,
+        ytm-pivot-bar-renderer,
+        ytm-search-box-renderer,
+        .ytm-pivot-bar,
+        ytm-comments-entry-point-header-renderer,
+        ytm-engagement-panel,
+        .related-items-container {
+            display: none !important;
+        }
+
         /* Ensure video fills webview properly */
+        .player-container,
+        #player,
+        .player-size {
+            width: 100% !important;
+            height: 100% !important;
+            position: relative !important;
+        }
+
         video.html5-main-video {
+            width: 100% !important;
+            height: 100% !important;
             object-fit: contain !important;
         }
     `;

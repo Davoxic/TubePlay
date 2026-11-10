@@ -7,8 +7,8 @@
 
 ### 📥 Direct Downloads & Links
 - **GitHub Repository**: [https://github.com/Davoxic/TubePlay](https://github.com/Davoxic/TubePlay)
-- **GitHub Releases Page**: [https://github.com/Davoxic/TubePlay/releases/tag/v1.0.0](https://github.com/Davoxic/TubePlay/releases/tag/v1.0.0)
-- **Download Unsigned IPA**: [**TubePlay-unsigned.ipa**](https://github.com/Davoxic/TubePlay/releases/download/v1.0.0/TubePlay-unsigned.ipa)
+- **GitHub Releases Page**: [https://github.com/Davoxic/TubePlay/releases/tag/v1.0.1](https://github.com/Davoxic/TubePlay/releases/tag/v1.0.1)
+- **Download Unsigned IPA (v1.0.1 - Fixed Error 152-4)**: [**TubePlay-unsigned.ipa**](https://github.com/Davoxic/TubePlay/releases/download/v1.0.1/TubePlay-unsigned.ipa)
 - **Local Workspace Copy**: `TubePlay-unsigned.ipa` (in project root)
 
 ---

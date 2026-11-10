@@ -234,24 +234,32 @@ public struct FullPlayerView: View {
                             }
                             .padding(.vertical, 8)
                             
-                            // Background Playback Active Banner
-                            HStack(spacing: 10) {
+                            // Background Playback Active Banner & Player Mode Toggle
+                            HStack(spacing: 8) {
                                 Circle()
                                     .fill(Color.green)
                                     .frame(width: 8, height: 8)
                                 
-                                Text("Screen-Off Audio Playback Active")
-                                    .font(.system(size: 12, weight: .medium))
+                                Text(playerEngine.playerDisplayMode == .direct ? "Direct Player (No Error 152-4)" : "Embedded Player")
+                                    .font(.system(size: 11, weight: .semibold))
                                     .foregroundColor(.primary)
                                 
                                 Spacer()
                                 
-                                Image(systemName: "lock.shield.fill")
-                                    .foregroundColor(.green)
-                                    .font(.system(size: 14))
+                                Button(action: {
+                                    playerEngine.togglePlayerDisplayMode()
+                                }) {
+                                    Text(playerEngine.playerDisplayMode == .direct ? "Switch Mode" : "Fix 152-4")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.red)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(Color(UIColor.secondarySystemBackground))
+                                        .cornerRadius(6)
+                                }
                             }
                             .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
+                            .padding(.vertical, 8)
                             .background(Color.green.opacity(0.12))
                             .cornerRadius(10)
                             .padding(.horizontal, 20)

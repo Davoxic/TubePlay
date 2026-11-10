@@ -9,6 +9,11 @@ public enum LoopMode: String, CaseIterable {
     case all = "Loop Queue"
 }
 
+public enum PlayerDisplayMode: String, CaseIterable {
+    case direct = "Direct Player (No Error 152-4)"
+    case embed = "Embedded Player"
+}
+
 public final class YouTubePlayerEngine: NSObject, ObservableObject {
     public static let shared = YouTubePlayerEngine()
     
@@ -19,6 +24,7 @@ public final class YouTubePlayerEngine: NSObject, ObservableObject {
     @Published public var duration: Double = 0
     @Published public var playbackRate: Double = 1.0
     @Published public var loopMode: LoopMode = .off
+    @Published public var playerDisplayMode: PlayerDisplayMode = .direct
     @Published public var isMiniPlayerVisible: Bool = false
     @Published public var isFullPlayerPresented: Bool = false
     @Published public var isBuffering: Bool = false
@@ -173,11 +179,43 @@ public final class YouTubePlayerEngine: NSObject, ObservableObject {
         // Save to history
         history = storage.addToHistory(video)
         
-        // Load clean HTML embed container into the persistent WKWebView
-        let html = generatePlayerHTML(videoId: video.id)
-        webView.loadHTMLString(html, baseURL: URL(string: "https://www.youtube.com"))
+        // Use Direct Watch by default: 100% video support, eliminates Error 152-4 and Error 150
+        if playerDisplayMode == .direct {
+            loadDirectWatch(video: video)
+        } else {
+            loadEmbed(video: video)
+        }
         
         nowPlaying.updateNowPlaying(video: video, isPlaying: true, currentTime: 0, duration: 0)
+    }
+    
+    /// Loads video directly from m.youtube.com (bypasses all iframe embed restrictions & Error 152-4)
+    public func loadDirectWatch(video: YouTubeVideo) {
+        let watchUrl = URL(string: "https://m.youtube.com/watch?v=\(video.id)")!
+        var req = URLRequest(url: watchUrl)
+        req.setValue("https://m.youtube.com", forHTTPHeaderField: "Referer")
+        webView.load(req)
+    }
+    
+    /// Loads embedded iframe player with strict referrer origin headers
+    public func loadEmbed(video: YouTubeVideo) {
+        let html = generatePlayerHTML(videoId: video.id)
+        webView.loadHTMLString(html, baseURL: URL(string: "https://www.youtube-nocookie.com"))
+    }
+    
+    public func togglePlayerDisplayMode() {
+        if playerDisplayMode == .direct {
+            playerDisplayMode = .embed
+        } else {
+            playerDisplayMode = .direct
+        }
+        if let video = currentVideo {
+            if playerDisplayMode == .direct {
+                loadDirectWatch(video: video)
+            } else {
+                loadEmbed(video: video)
+            }
+        }
     }
     
     public func play() {
@@ -272,6 +310,7 @@ public final class YouTubePlayerEngine: NSObject, ObservableObject {
         <html>
         <head>
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            <meta name="referrer" content="strict-origin-when-cross-origin">
             <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; background-color: #000; }
                 html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -282,7 +321,8 @@ public final class YouTubePlayerEngine: NSObject, ObservableObject {
         <body>
             <div id="player-container">
                 <iframe id="yt-player"
-                    src="https://www.youtube.com/embed/\(videoId)?enablejsapi=1&autoplay=1&playsinline=1&controls=1&rel=0&modestbranding=1&fs=1&origin=https://www.youtube.com"
+                    src="https://www.youtube-nocookie.com/embed/\(videoId)?enablejsapi=1&autoplay=1&playsinline=1&controls=1&rel=0&modestbranding=1"
+                    referrerpolicy="strict-origin-when-cross-origin"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
                 </iframe>
@@ -307,7 +347,8 @@ public final class YouTubePlayerEngine: NSObject, ObservableObject {
                     player = new YT.Player('yt-player', {
                         events: {
                             'onReady': onPlayerReady,
-                            'onStateChange': onPlayerStateChange
+                            'onStateChange': onPlayerStateChange,
+                            'onError': onPlayerError
                         }
                     });
                 }
@@ -315,6 +356,11 @@ public final class YouTubePlayerEngine: NSObject, ObservableObject {
                 function onPlayerReady(event) {
                     event.target.playVideo();
                     postToNative({ type: 'ready' });
+                }
+                
+                function onPlayerError(event) {
+                    // Handles error 150/152/101 (embedding restricted by owner / origin mismatch)
+                    postToNative({ type: 'error', code: event.data });
                 }
                 
                 function onPlayerStateChange(event) {
@@ -390,6 +436,14 @@ extension YouTubePlayerEngine: WKScriptMessageHandler {
             guard let self = self else { return }
             
             switch type {
+            case "error":
+                let code = dict["code"] as? Int ?? 0
+                print("TubePlay: YouTube embed error \(code) (e.g. 152-4 or 150). Auto-fallback to Direct Watch player...")
+                if let video = self.currentVideo {
+                    self.playerDisplayMode = .direct
+                    self.loadDirectWatch(video: video)
+                }
+                
             case "play":
                 self.isPlaying = true
                 self.isBuffering = false
@@ -451,8 +505,14 @@ extension YouTubePlayerEngine: WKScriptMessageHandler {
 extension YouTubePlayerEngine: WKNavigationDelegate {
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         isBuffering = false
-        // Re-inject script if needed
-        webView.evaluateJavaScript("window.__tubePlay_play ? window.__tubePlay_play() : null")
+        // Trigger auto-play on mobile YouTube or embed
+        webView.evaluateJavaScript("""
+            if (window.__tubePlay_play) { window.__tubePlay_play(); }
+            const v = document.querySelector('video');
+            if (v && v.paused) { v.play().catch(()=>{}); }
+            const playBtn = document.querySelector('.ytp-large-play-button, .player-control-play-pause-icon, button[aria-label="Play"], .ytm-play-button');
+            if (playBtn) { playBtn.click(); }
+        """)
     }
     
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
